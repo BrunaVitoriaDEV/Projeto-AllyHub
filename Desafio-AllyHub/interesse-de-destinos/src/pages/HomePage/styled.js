@@ -16,20 +16,10 @@ background-image:  url(${backHome});
     width: 100%;
 }
 `
-export const Containerleft = styled.div`
-display: flex;
-align-items: center;
-height: 100vh;
-text-align: center;
-justify-content: center;
-font-size: 50px;
-color: black;
-
->h1{
-    -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color:blue;
-}
+export const H1 = styled.h1`
+color: white;
 `
+
 export const ContainerRight = styled.div`
 display: flex;
 align-items: center;
