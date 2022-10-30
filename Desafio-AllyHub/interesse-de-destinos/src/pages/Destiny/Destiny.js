@@ -1,13 +1,67 @@
 import { ErrorMessage, Field, Form, Formik } from "formik";
-import React from "react"
+import React, { useEffect, useState } from "react"
 import Header from "../../Components/header/header"
 import * as yup from "yup";
 import { cpf } from "cpf-cnpj-validator";
-import Select from "react-select";
-import makeAnimated from "react-select/animated";
+import FixRequiredSelect from "./FixRequiredSelect";
+import BaseSelect from "react-select";
+import axios from "axios";
+import { FatherCards, SectionContainer } from "./styled";
+import { useNavigate } from "react-router-dom";
+import { goBack } from "../../router/coordenator";
+
 
 
 const Destiny = () => {
+    const [paisTrip, setPaisTrip] = useState()
+    const [cidadeTrip, setCidadeTrip] = useState([])
+    const navigate = useNavigate()
+
+    function buscarPais() {
+        const url = "https://amazon-api.sellead.com/country"
+        axios.get(url)
+            .then((res) => {
+                console.log(res.data)
+                setPaisTrip(res.data) // arnazena o valor no meu estado
+            }).catch((err) => {
+                console.log(err)
+            })
+    }
+    function buscarCidade() {
+        const url = "https://amazon-api.sellead.com/city"
+        axios.get(url)
+            .then((res) => {
+                console.log(res.data)
+                setCidadeTrip(res.data)
+            }).catch((err) => {
+                console.log(err)
+            })
+    }
+    useEffect(() => { // Usado para o ciclo de vida quando a tela carregar aparecer o componente.
+        buscarPais()
+        buscarCidade()
+    }, [])
+
+    const optionsCountry = paisTrip?.map(item => {
+        return {
+            label: item.name_ptbr,
+            value: item.name_ptbr
+        }
+    })
+
+    const optionsCity = cidadeTrip?.map(item => {
+        return {
+            label: item.name_ptbr,
+            value: item.name_ptbr
+        }
+    })
+
+    const onSubmit = (event) => {
+        event.preventDefault()
+
+        alert("Informações enviadas")
+    }
+
     const validationSchema = yup.object({
         email: yup
             .string()
@@ -23,33 +77,36 @@ const Destiny = () => {
         name: yup
             .string()
             .required("Name is required"),
-        estado: yup
-            .string()
-            .required("Estados")
     });
-    const options = [
-        { value: "produto 01", label: "Produto 01" },
-        { value: "produto 02", label: "Produto 02" },
-        { value: "produto 03", label: "Produto 03" },
-        { value: "produto 04", label: "Produto 04" },
-        { value: "produto 05", label: "Produto 05" },
-        { value: "produto 06", label: "Produto 06" },
-        { value: "produto 07", label: "Produto 07" },
-        { value: "produto 08", label: "Produto 08" },
-    ];
-    const animatedComponents = makeAnimated();
+
+    const Select = props => (
+        <FixRequiredSelect
+            {...props}
+            SelectComponent={BaseSelect}
+            options={props.optionsCountry || optionsCountry}
+        />
+    );
+    const Select1 = props => (
+        <FixRequiredSelect
+            {...props}
+            SelectComponent={BaseSelect}
+            options={props.optionsCity || optionsCity}
+        />
+    );
 
     return (
         <Formik
-            initialValues={{ email: "", CPF: "", fone: "", name: "" }}
+            initialValues={{ email: "", CPF: "", fone: "", name: "", pais: "", cidade: "" }}
             validationSchema={validationSchema}
         >
+  
             <div>
                 <Header />
-                <div>
-                    <div>
-                        <h1>Dados pessoais:</h1>
-                        <Form >
+                <Form onSubmit={onSubmit} >
+                <FatherCards>
+                        <SectionContainer>
+                            <h1>Dados pessoais:</h1>
+
                             <div>
                                 <Field required name="name" placeholder="name" />
                                 <ErrorMessage component="name" name="name" />
@@ -67,51 +124,28 @@ const Destiny = () => {
                                 <Field required name="fone" placeholder="Telefone" />
                                 <ErrorMessage component="fone" name="fone" />
                             </div>
-                            <div>
-                                <Select required
-                                    name="estado"
-                                    placeholder="Estados"
-                                    defaultValue={[options[0], options[2]]}
-                                    components={animatedComponents}
-                                    isMulti
-                                    options={options}
-                                    className={Field}
-                                    isClearable={true}
-                                    isSearchable={true}
-                                    isDisabled={false}
-                                    isLoading={false}
-                                    isRtl={false}
-                                    closeMenuOnSelect={false}
-                                />
-                                <ErrorMessage component="estado" name="estado" />
-                            </div>
-                            <div>
-                                <Select required
-                                    name="cidades"
-                                    placeholder="Cidades"
-                                    defaultValue={[options[0], options[2]]}
-                                    components={animatedComponents}
-                                    isMulti
-                                    options={options}
-                                    className={Field}
-                                    isClearable={true}
-                                    isSearchable={true}
-                                    isDisabled={false}
-                                    isLoading={false}
-                                    isRtl={false}
-                                    closeMenuOnSelect={false}
-                                />
-                                <ErrorMessage component="estado" name="estado" />
-                            </div>
 
+
+                        </SectionContainer>
+                        <SectionContainer>
+                            <h2>Viagem desejada:</h2>
+                            <div className="form-group">
+                                <i className="text-danger">Paises pretendidas</i>
+                                <Select multiple isMulti options={optionsCountry} isSearchable required />
+
+
+                            </div>
+                            <div>
+                             <i className="text-danger">Cidades pretendidas:</i>
+                                <Select1 multiple isMulti options={optionsCity} isSearchable required />
+                            </div>
 
                             <button type="submit">Submit</button>
-                        </Form>
-                    </div>
-                    <div>
-                        <h2>Viagem desejada:</h2>
-                    </div>
-                </div>
+                            <button onClick={() => goBack(navigate)}>Voltar</button>
+                        </SectionContainer>
+
+                </FatherCards>
+                                    </Form>
             </div>
         </Formik>
     )

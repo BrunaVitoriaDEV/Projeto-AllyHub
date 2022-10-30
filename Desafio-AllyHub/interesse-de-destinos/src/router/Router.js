@@ -8,8 +8,8 @@ const Router = () => {
     return(
         <BrowserRouter>
            <Routes>
-            <Route index element ={<Destiny/>} />
-            <Route path='/InteresseDeDestinos' element ={<HomePage/>} />
+            <Route index element ={<HomePage/>} />
+            <Route path='/InteresseDeDestinos' element ={<Destiny/>} />
            </Routes>
         </BrowserRouter>
 
